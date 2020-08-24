@@ -1,0 +1,18 @@
+﻿
+# Debug és debug mappák kihagyása
+[Dd]ebug/
+
+# az összes .txt kiterjesztésű fájl kihagyása
+#*.txt
+
+# obj könyvtár kihagyása
+obj/
+
+# config.c fájl kihagyása
+config.c
+
+# lib/main.c fájlt kövesse, nem lesz a kihagyott fájlok között
+!lib/main.c
+
+*.exe
+*.pdb
