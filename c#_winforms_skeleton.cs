@@ -25,11 +25,11 @@ using System.Reflection; // https://codecharm.com/blog/archive/2017-11-19-c-asse
 [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyFileVersion("1.0.0.002")]
 
-[assembly: AssemblyTitle("WindowsFormsSkelertonApplication")]
+[assembly: AssemblyTitle("WindowsFormsSkeletonApplication")]
 //[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Kis János Tamás")]
-[assembly: AssemblyProduct("WindowsFormsSkelertonApplication")]
+[assembly: AssemblyProduct("WindowsFormsSkeletonApplication")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
