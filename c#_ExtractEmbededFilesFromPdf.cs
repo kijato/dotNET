@@ -6,7 +6,7 @@ rename lib pdfpig
 */
 // https://web.archive.org/web/20060427192430/http://partners.adobe.com/public/developer/en/pdf/PDFReference16.pdf
 // c:\ProgramData\CS-Script\CSScriptNpp\1.7.24.0\Roslyn\csc.exe
-// csc.exe -r:UglyToad.PdfPig.dll,UglyToad.PdfPig.Tokens.dll -debug- -target:exe -platform:x64 ExtractEmbededFilesFromPdf.cs
+// csc.exe -r:UglyToad.PdfPig.dll,UglyToad.PdfPig.Core.dll,UglyToad.PdfPig.Tokens.dll -debug- -target:exe -platform:x64 ExtractEmbededFilesFromPdf.cs
 //
 using System;
 using System.IO;
@@ -23,11 +23,44 @@ using UglyToad.PdfPig.Tokens;
 
 public static class Program
 {
+	static List<String> fileList = new List<String>();
+	
     public static void Main(string[] args)
     {
-		//String fn = args[0];
-		String fn = @"c:\Temp\pdfpig\35600_5904-1_2019.pdf";
-        using (PdfDocument document = PdfDocument.Open(fn))
+		// String fileName = args[0];
+		// String fileName = @"c:\Temp\pdfpig\35600_5904-1_2019.pdf";
+        // String fileName = @"c:\Temp\!!Elektonikus tértivevény minta\Aláírt_minta_1353.pdf";
+		// string[] files = Directory.GetFiles(@"c:\", "c*");
+		// string[] dirs  = Directory.GetDirectories(@"c:\", "p*", SearchOption.TopDirectoryOnly);
+		
+        foreach(string path in args)
+        {
+            if( File.Exists(path) && path.EndsWith(".pdf") )
+			{
+				Extract(path);
+			}
+            else //if( Directory.Exists(path) )
+            {
+                ProcessDirectory(path);
+            }
+
+        }		
+
+		foreach(string file in fileList)
+		{
+			if ( file.EndsWith(".pdf") )
+			{
+				Extract(file);
+			}
+		}
+	}
+
+	//
+	
+	// 
+    public static void Extract(string fileName)
+    {
+        using (PdfDocument document = PdfDocument.Open(fileName))
         {
             Console.WriteLine($"Document has {document.NumberOfPages} pages.");
             Console.WriteLine("DocumentInformationDictionary: "+document.Information.DocumentInformationDictionary);
@@ -48,7 +81,6 @@ public static class Program
 				Console.WriteLine("\t"+key.PageNumber);
 				Console.WriteLine("\t"+key.RawFieldType);
 			}
-			
 			
             if (document.TryGetForm(out AcroForm form))
             {
@@ -73,10 +105,10 @@ public static class Program
             if (document.TryGetXmpMetadata(out XmpMetadata metadata))
             {
                 XDocument xmp = metadata.GetXDocument();
-				Console.WriteLine('['+xmp.Element("Author").Value+']');
-				Console.WriteLine('['+xmp.Element("Title").Value+']');
-				Console.WriteLine('['+xmp.Element("Name").Value+']');
-				Console.WriteLine('['+xmp.Element("Description").Value+']');
+				// Console.WriteLine('['+xmp.Element("Author").Value+']');
+				// Console.WriteLine('['+xmp.Element("Title").Value+']');
+				// Console.WriteLine('['+xmp.Element("Name").Value+']');
+				// Console.WriteLine('['+xmp.Element("Description").Value+']');
             }
 			else
 			{
@@ -105,7 +137,7 @@ public static class Program
 
 					IReadOnlyList<byte> bytes = file.Bytes;
 
-					using (BinaryWriter writer = new BinaryWriter(File.Open(args[0]+"_-_"+file.Name, FileMode.Create)))
+					using (BinaryWriter writer = new BinaryWriter(File.Open(fileName+"_-_"+file.Name, FileMode.Create)))
 					{
 						//writer.Write(bytes);
 						foreach(var b in bytes)
@@ -113,10 +145,33 @@ public static class Program
 							writer.Write(b);
 						}
 					}
-					Console.WriteLine("\tThe file saved to: '"+args[0]+"_-_"+file.Name+"'");
+					Console.WriteLine("\tThe file saved to: '"+fileName+"_-_"+file.Name+"'");
 
 				}
             }
         }
     }
+	
+	//
+	
+	/* https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getdirectories?view=netframework-4.8 */
+	// Process all files in the directory passed in, recurse on any directories that are found, and process the files they contain.
+	public static void ProcessDirectory(string targetDirectory)
+	{
+        // Process the list of files found in the directory.
+        string [] fileEntries = Directory.GetFiles(targetDirectory);
+        foreach(string fileName in fileEntries)
+            ProcessFile(fileName);
+        // Recurse into subdirectories of this directory.
+        string [] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
+        // string[] dirs = Directory.GetDirectories(@"c:\", "p*", SearchOption.TopDirectoryOnly);
+        foreach(string subdirectory in subdirectoryEntries)
+            ProcessDirectory(subdirectory);
+    }
+	// Insert logic for processing found files here.
+    public static void ProcessFile(string fileName)
+    {
+        fileList.Add(Path.GetFullPath(fileName));
+    }	
+	
 }
