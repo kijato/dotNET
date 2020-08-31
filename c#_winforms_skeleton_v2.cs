@@ -56,8 +56,8 @@ namespace WindowsFormsSkeletonApplication
             this.Font = new Font(FontFamily.GenericSansSerif, 10);
 
             mi1 = new MenuItem(text: "&File");
-			mm.MenuItems.Add(mi1);
-			mi1.MenuItems.Add(new MenuItem(text: "&Open", onClick: mi2_Click));
+            mm.MenuItems.Add(mi1);
+	    mi1.MenuItems.Add(new MenuItem(text: "&Open", onClick: mi2_Click));
             mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
             mi1.MenuItems.Add("----");
             mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
