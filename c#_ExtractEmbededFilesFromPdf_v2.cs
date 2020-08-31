@@ -6,7 +6,7 @@ rename lib pdfpig
 */
 // https://web.archive.org/web/20060427192430/http://partners.adobe.com/public/developer/en/pdf/PDFReference16.pdf
 // c:\ProgramData\CS-Script\CSScriptNpp\1.7.24.0\Roslyn\csc.exe
-// csc.exe -r:UglyToad.PdfPig.dll,UglyToad.PdfPig.Core.dll,UglyToad.PdfPig.Tokens.dll -debug- -target:exe -platform:x64 ExtractEmbededFilesFromPdf.cs
+// csc.exe -r:UglyToad.PdfPig.dll,UglyToad.PdfPig.Core.dll,UglyToad.PdfPig.Tokens.dll -debug- -target:exe -platform:x64 c#_ExtractEmbededFilesFromPdf_v2.cs
 //
 using System;
 using System.IO;
@@ -29,21 +29,13 @@ public static class Program
     {
 		// String fileName = args[0];
 		// String fileName = @"c:\Temp\pdfpig\35600_5904-1_2019.pdf";
-        // String fileName = @"c:\Temp\!!Elektonikus tértivevény minta\Aláírt_minta_1353.pdf";
+        //String fileName = @"c:\Temp\!!Elektonikus tértivevény minta\Minták\Aláírt_minta_1353.pdf";
 		// string[] files = Directory.GetFiles(@"c:\", "c*");
 		// string[] dirs  = Directory.GetDirectories(@"c:\", "p*", SearchOption.TopDirectoryOnly);
 		
         foreach(string path in args)
         {
-            if( File.Exists(path) && path.EndsWith(".pdf") )
-			{
-				Extract(path);
-			}
-            else //if( Directory.Exists(path) )
-            {
-                ProcessDirectory(path);
-            }
-
+			ProcessDirectory(path);
         }		
 
 		foreach(string file in fileList)
