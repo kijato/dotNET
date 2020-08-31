@@ -21,20 +21,19 @@ namespace WindowsFormsSkeletonApplication
 
         Panel p = new Panel();
 		
-		static SplitContainer splitContainer = new SplitContainer();
+		SplitContainer splitContainer = new SplitContainer();
 		
         StatusBar sb = new StatusBar();
         StatusBarPanel sbp1 = new StatusBarPanel();
         StatusBarPanel sbp2 = new StatusBarPanel();
 
 
-				Form f = new Form();
-				ListBox listBox1 = new ListBox();
-				Label l = new Label();
+			Form f = new Form();
+			ListBox listBox1 = new ListBox();
+			Label l = new Label();
 
 
-
-        [STAThread]
+		[STAThread]
         public static void Main(string[] args)
         {
             try
@@ -56,11 +55,13 @@ namespace WindowsFormsSkeletonApplication
             this.Font = new Font(FontFamily.GenericSansSerif, 10);
 
             mi1 = new MenuItem(text: "&File");
-            mm.MenuItems.Add(mi1);
-	    mi1.MenuItems.Add(new MenuItem(text: "&Open", onClick: mi2_Click));
-            mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
-            mi1.MenuItems.Add("----");
-            mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
+			mm.MenuItems.Add(mi1);
+				MenuItem mi2 = new MenuItem("&Open");
+				mi2.Click += new EventHandler(mi2_Click);
+				mi1.MenuItems.Add(mi2);
+				mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
+				mi1.MenuItems.Add("----");
+				mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
             this.Menu = mm;
 
             sb.Panels.Add(sbp1);
@@ -100,7 +101,6 @@ namespace WindowsFormsSkeletonApplication
         private void mi3_Click(object sender, EventArgs e)
         {
             MessageBox.Show( this.Font.ToString() +"\n"+ sb.Font.ToString() );
-			
 			
 				listBox1.Width = f.Width - 25;
 				listBox1.Location = new Point(5,5);
