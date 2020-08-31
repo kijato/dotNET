@@ -28,12 +28,12 @@ namespace WindowsFormsSkeletonApplication
         StatusBarPanel sbp2 = new StatusBarPanel();
 
 
-			Form f = new Form();
-			ListBox listBox1 = new ListBox();
-			Label l = new Label();
+		Form f = new Form();
+		ListBox listBox1 = new ListBox();
+		Label l = new Label();
 
 
-		[STAThread]
+	[STAThread]
         public static void Main(string[] args)
         {
             try
@@ -55,13 +55,13 @@ namespace WindowsFormsSkeletonApplication
             this.Font = new Font(FontFamily.GenericSansSerif, 10);
 
             mi1 = new MenuItem(text: "&File");
-			mm.MenuItems.Add(mi1);
-				MenuItem mi2 = new MenuItem("&Open");
-				mi2.Click += new EventHandler(mi2_Click);
-				mi1.MenuItems.Add(mi2);
-				mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
-				mi1.MenuItems.Add("----");
-				mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
+		mm.MenuItems.Add(mi1);
+			MenuItem mi2 = new MenuItem("&Open");
+			mi2.Click += new EventHandler(mi2_Click);
+			mi1.MenuItems.Add(mi2);
+			mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
+			mi1.MenuItems.Add("----");
+			mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
             this.Menu = mm;
 
             sb.Panels.Add(sbp1);
@@ -82,14 +82,14 @@ namespace WindowsFormsSkeletonApplication
             p.MouseMove += new MouseEventHandler(Panel_MouseMove);
             this.Controls.Add(p);*/
 
-			splitContainer.Location = new Point(3, 3);
-			splitContainer.Size = new Size( this.Width - 18 - 5, this.Height - sb.Height - 45 );
-			splitContainer.BorderStyle = BorderStyle.FixedSingle;
-			splitContainer.Anchor = ( AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right );
-			splitContainer.Panel1.BackColor = Color.FloralWhite;
-			splitContainer.Panel2.BackColor = Color.GhostWhite;
-			Controls.Add(splitContainer);
-			splitContainer.Panel1.MouseMove += new MouseEventHandler(Panel_MouseMove);
+		splitContainer.Location = new Point(3, 3);
+		splitContainer.Size = new Size( this.Width - 18 - 5, this.Height - sb.Height - 45 );
+		splitContainer.BorderStyle = BorderStyle.FixedSingle;
+		splitContainer.Anchor = ( AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right );
+		splitContainer.Panel1.BackColor = Color.FloralWhite;
+		splitContainer.Panel2.BackColor = Color.GhostWhite;
+		Controls.Add(splitContainer);
+		splitContainer.Panel1.MouseMove += new MouseEventHandler(Panel_MouseMove);
 
 		}
 
@@ -102,17 +102,17 @@ namespace WindowsFormsSkeletonApplication
         {
             MessageBox.Show( this.Font.ToString() +"\n"+ sb.Font.ToString() );
 			
-				listBox1.Width = f.Width - 25;
-				listBox1.Location = new Point(5,5);
-				foreach ( FontFamily oneFontFamily in FontFamily.Families )
-				{
-					listBox1.Items.Add(oneFontFamily.Name);
-				}
-				listBox1.DoubleClick += new EventHandler(ListBox1_DoubleClick);
-				f.Controls.Add(listBox1);
-				l.Location = new Point(5,listBox1.Top + listBox1.Height +5);
-				f.Controls.Add(l);
-				f.Show();			
+		listBox1.Width = f.Width - 25;
+		listBox1.Location = new Point(5,5);
+		foreach ( FontFamily oneFontFamily in FontFamily.Families )
+		{
+			listBox1.Items.Add(oneFontFamily.Name);
+		}
+		listBox1.DoubleClick += new EventHandler(ListBox1_DoubleClick);
+		f.Controls.Add(listBox1);
+		l.Location = new Point(5,listBox1.Top + listBox1.Height +5);
+		f.Controls.Add(l);
+		f.Show();			
 			
         }
 
