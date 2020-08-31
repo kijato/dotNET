@@ -25,11 +25,11 @@ using System.Reflection; // https://codecharm.com/blog/archive/2017-11-19-c-asse
 [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyFileVersion("1.0.0.002")]
 
-[assembly: AssemblyTitle("WindowsFormsSkeletonApplication")]
+[assembly: AssemblyTitle("WindowsFormsSkelertonApplication")]
 //[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Kis János Tamás")]
-[assembly: AssemblyProduct("WindowsFormsSkeletonApplication")]
+[assembly: AssemblyProduct("WindowsFormsSkelertonApplication")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -114,9 +114,9 @@ public class Program : Form
 		// Controls.Add(dataGridView);
 		
 		splitContainer.Location = new Point(5, 30);
-		splitContainer.Size = new Size(this.Width-25, this.Height-95);
+		splitContainer.Size = new Size(this.Width-20, this.Height-95);
 		splitContainer.Anchor = ( AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right );
-		splitContainer.Panel1.BackColor = Color.LightGray;
+		splitContainer.Panel1.BackColor = Color.WhiteSmoke;
 		splitContainer.Panel2.BackColor = Color.GhostWhite;
 		
 		Controls.Add(splitContainer);
