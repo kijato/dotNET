@@ -10,6 +10,8 @@ c:\ProgramData\CS-Script\CSScriptNpp\1.7.24.0\Roslyn\csc.exe -debug- -target:exe
 using System;
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
+using System.Collections.Generic;
 
 namespace WindowsFormsSkeletonApplication
 {
@@ -17,7 +19,6 @@ namespace WindowsFormsSkeletonApplication
     {
 
         MainMenu mm = new MainMenu();
-		MenuItem mi1;
 
 		SplitContainer splitContainer = new SplitContainer();
 		
@@ -52,22 +53,19 @@ namespace WindowsFormsSkeletonApplication
         {
             this.Size = new Size(500, 300);
             this.Text = Application.StartupPath;
-            this.Font = new Font(FontFamily.GenericSansSerif, 10);
+            this.Font = new Font(FontFamily.GenericSansSerif, 8);
 
-			mi1 = new MenuItem(text: "&File");
-			mm.MenuItems.Add(mi1);
-			MenuItem mi2 = new MenuItem("&Open");
-			mi2.Click += new EventHandler(mi2_Click);
-			mi1.MenuItems.Add(mi2);
+			MenuItem mi1 = new MenuItem(text: "&File");
+			mi1.MenuItems.Add(new MenuItem("&Open directory", new EventHandler(mi2_Click)));
 			mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
-			mi1.MenuItems.Add("----");
+			mi1.MenuItems.Add(new MenuItem("-"));
 			mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
-            this.Menu = mm;
+			mm.MenuItems.Add(mi1);
+			this.Menu = mm;
 
             sb.Panels.Add(sbp1);
             sb.Panels.Add(sbp2);
             sb.ShowPanels = true;
-            sb.Font = new Font(FontFamily.GenericSansSerif, this.Font.Size-2);
             this.Controls.Add(sb);
 
             sbp1.Text = "-";
@@ -82,8 +80,8 @@ namespace WindowsFormsSkeletonApplication
 			splitContainer.Anchor = ( AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right );
 			splitContainer.Panel1.BackColor = Color.FloralWhite;
 			splitContainer.Panel2.BackColor = Color.GhostWhite;
-			Controls.Add(splitContainer);
 			splitContainer.Panel1.MouseMove += new MouseEventHandler(Panel_MouseMove);
+			Controls.Add(splitContainer);
 
 			treeView = new TreeView();
 			treeView.Dock = DockStyle.Fill;
@@ -97,14 +95,13 @@ namespace WindowsFormsSkeletonApplication
 			treeNode = new TreeNode("Dot Net Perls", array);
 			treeView.Nodes.Add(treeNode);
 			treeView.MouseDoubleClick += new MouseEventHandler(treeView_MouseDoubleClick);
-
 			splitContainer.Panel1.Controls.Add(treeView);
 			
 			listView = new ListView();
 			listView.Dock = DockStyle.Fill;
-			
+			listView.View = View.List;
+			listView.GridLines = true;
 			splitContainer.Panel2.Controls.Add(listView);
-
 
 		}
 
@@ -117,24 +114,43 @@ namespace WindowsFormsSkeletonApplication
 
         private void mi2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show( sender.ToString() + Environment.NewLine + Environment.NewLine + e.ToString() );
+            using(var fbd = new FolderBrowserDialog())
+			{
+				fbd.SelectedPath = Environment.CurrentDirectory;//Directory.GetCurrentDirectory()
+				fbd.ShowNewFolderButton = false;
+				DialogResult result = fbd.ShowDialog();
+				if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+				{
+					listView.Clear();
+					foreach (var row in getFileList(fbd.SelectedPath, "*.pdf"))
+					{
+						ListViewItem item = new ListViewItem(row.ToString());
+						//for (int i = 1; i < data.Columns.Count; i++)
+						//{
+						//	item.SubItems.Add(row[i].ToString());
+						//}
+						listView.Items.Add(item);
+					}
+				}
+			}
+			
         }
 
         private void mi3_Click(object sender, EventArgs e)
         {
             MessageBox.Show( this.Font.ToString() +"\n"+ sb.Font.ToString() );
 			
-		listBox1.Width = f.Width - 25;
-		listBox1.Location = new Point(5,5);
-		foreach ( FontFamily oneFontFamily in FontFamily.Families )
-		{
-			listBox1.Items.Add(oneFontFamily.Name);
-		}
-		listBox1.DoubleClick += new EventHandler(ListBox1_DoubleClick);
-		f.Controls.Add(listBox1);
-		l.Location = new Point(5,listBox1.Top + listBox1.Height +5);
-		f.Controls.Add(l);
-		f.Show();			
+			listBox1.Width = f.Width - 25;
+			listBox1.Location = new Point(5,5);
+			foreach ( FontFamily oneFontFamily in FontFamily.Families )
+			{
+				listBox1.Items.Add(oneFontFamily.Name);
+			}
+			listBox1.DoubleClick += new EventHandler(ListBox1_DoubleClick);
+			f.Controls.Add(listBox1);
+			l.Location = new Point(5,listBox1.Top + listBox1.Height +5);
+			f.Controls.Add(l);
+			f.Show();			
 			
         }
 
@@ -151,5 +167,35 @@ namespace WindowsFormsSkeletonApplication
             }
         }
 		
+		
+
+		private List<String> getFileList(String path, String filter)
+		{
+			List<String> fileList = new List<String>();
+			ProcessDirectory(path, filter);
+			return fileList;
+			
+			/* https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getdirectories?view=netframework-4.8 */
+			// Process all files in the directory passed in, recurse on any directories that are found, and process the files they contain.
+			void ProcessDirectory(string targetDirectory, string pattern)
+			{
+				// Process the list of files found in the directory.
+				string [] fileEntries = Directory.GetFiles(targetDirectory);
+				foreach(string fileName in fileEntries)
+					ProcessFile(fileName);
+				// Recurse into subdirectories of this directory.
+				//string [] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
+				string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory, pattern, SearchOption.TopDirectoryOnly);
+				foreach(string subdirectory in subdirectoryEntries)
+					ProcessDirectory(subdirectory, pattern);
+			}
+			// Insert logic for processing found files here.
+			void ProcessFile(string fileName)
+			{
+				fileList.Add(Path.GetFullPath(fileName));
+			}	
+
+		}			
+
     }
 }
