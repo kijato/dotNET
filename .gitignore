@@ -16,3 +16,4 @@ config.c
 
 *.exe
 *.pdb
+*.pdf
