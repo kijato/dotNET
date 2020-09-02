@@ -85,7 +85,7 @@ namespace WindowsFormsSkeletonApplication
 
 			treeView = new TreeView();
 			treeView.Dock = DockStyle.Fill;
-			TreeNode treeNode = new TreeNode("Windows");
+			/*TreeNode treeNode = new TreeNode("Windows");
 			treeView.Nodes.Add(treeNode);
 			treeNode = new TreeNode("Linux");
 			treeView.Nodes.Add(treeNode);
@@ -93,8 +93,9 @@ namespace WindowsFormsSkeletonApplication
 			TreeNode node3 = new TreeNode("VB.NET");
 			TreeNode[] array = new TreeNode[] { node2, node3 };
 			treeNode = new TreeNode("Dot Net Perls", array);
-			treeView.Nodes.Add(treeNode);
+			treeView.Nodes.Add(treeNode);*/
 			treeView.MouseDoubleClick += new MouseEventHandler(treeView_MouseDoubleClick);
+			treeView.NodeMouseClick += new TreeNodeMouseClickEventHandler(treeView_NodeMouseClick);
 			splitContainer.Panel1.Controls.Add(treeView);
 			
 			listView = new ListView();
@@ -138,7 +139,7 @@ namespace WindowsFormsSkeletonApplication
 
         private void mi3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show( this.Font.ToString() +"\n"+ sb.Font.ToString() );
+            /*MessageBox.Show( this.Font.ToString() +"\n"+ sb.Font.ToString() );
 			
 			listBox1.Width = f.Width - 25;
 			listBox1.Location = new Point(5,5);
@@ -150,7 +151,10 @@ namespace WindowsFormsSkeletonApplication
 			f.Controls.Add(listBox1);
 			l.Location = new Point(5,listBox1.Top + listBox1.Height +5);
 			f.Controls.Add(l);
-			f.Show();			
+			f.Show();*/
+
+
+			PopulateTreeView(Directory.GetCurrentDirectory());
 			
         }
 
@@ -197,5 +201,75 @@ namespace WindowsFormsSkeletonApplication
 
 		}			
 
+		
+		
+		// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/creating-an-explorer-style-interface-with-the-listview-and-treeview
+		private void PopulateTreeView(String path)
+		{
+			TreeNode rootNode;
+			
+			DirectoryInfo info = new DirectoryInfo(path);
+			if (info.Exists)
+			{
+				rootNode = new TreeNode(info.Name);
+				rootNode.Tag = info;
+				GetDirectories(info.GetDirectories(), rootNode);
+				treeView.Nodes.Add(rootNode);
+			}
+		}
+
+		private void GetDirectories(DirectoryInfo[] subDirs, TreeNode nodeToAddTo)
+		{
+			TreeNode aNode;
+			DirectoryInfo[] subSubDirs;
+			foreach (DirectoryInfo subDir in subDirs)
+			{
+				aNode = new TreeNode(subDir.Name, 0, 0);
+				aNode.Tag = subDir;
+				aNode.ImageKey = "folder";
+				subSubDirs = subDir.GetDirectories();
+				if (subSubDirs.Length != 0)
+				{
+					GetDirectories(subSubDirs, aNode);
+				}
+				nodeToAddTo.Nodes.Add(aNode);
+			}
+		}
+
+		void treeView_NodeMouseClick(object sender,
+		TreeNodeMouseClickEventArgs e)
+		{
+			TreeNode newSelected = e.Node;
+			listView.Items.Clear();
+			DirectoryInfo nodeDirInfo = (DirectoryInfo)newSelected.Tag;
+			ListViewItem.ListViewSubItem[] subItems;
+			ListViewItem item = null;
+
+			foreach (DirectoryInfo dir in nodeDirInfo.GetDirectories())
+			{
+				item = new ListViewItem(dir.Name, 0);
+				subItems = new ListViewItem.ListViewSubItem[]
+					{new ListViewItem.ListViewSubItem(item, "Directory"),
+					 new ListViewItem.ListViewSubItem(item,
+						dir.LastAccessTime.ToShortDateString())};
+				item.SubItems.AddRange(subItems);
+				listView.Items.Add(item);
+			}
+			foreach (FileInfo file in nodeDirInfo.GetFiles())
+			{
+				item = new ListViewItem(file.Name, 1);
+				subItems = new ListViewItem.ListViewSubItem[]
+					{ new ListViewItem.ListViewSubItem(item, "File"),
+					 new ListViewItem.ListViewSubItem(item,
+						file.LastAccessTime.ToShortDateString())};
+
+				item.SubItems.AddRange(subItems);
+				listView.Items.Add(item);
+			}
+
+			listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+		}		
+
+		
     }
 }
