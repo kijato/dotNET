@@ -57,7 +57,7 @@ namespace WindowsFormsSkeletonApplication
 
 			MenuItem mi1 = new MenuItem(text: "&File");
 			mi1.MenuItems.Add(new MenuItem("&Open directory", new EventHandler(mi2_Click)));
-			mi1.MenuItems.Add(new MenuItem(text: "&Save", onClick: mi3_Click));
+			mi1.MenuItems.Add(new MenuItem("&Save", new EventHandler(mi3_Click)));
 			mi1.MenuItems.Add(new MenuItem("-"));
 			mi1.MenuItems.Add(new MenuItem(text: "&Exit", onClick: (sender, args) => Application.Exit()));
 			mm.MenuItems.Add(mi1);
@@ -75,12 +75,12 @@ namespace WindowsFormsSkeletonApplication
 
 
 			splitContainer.Location = new Point(3, 3);
-			splitContainer.Size = new Size( this.Width - 18 - 5, this.Height - sb.Height - 45 );
+			splitContainer.Size = new Size( this.Width - 23, this.Height - sb.Height - 45 );
 			splitContainer.BorderStyle = BorderStyle.FixedSingle;
 			splitContainer.Anchor = ( AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right );
 			splitContainer.Panel1.BackColor = Color.FloralWhite;
 			splitContainer.Panel2.BackColor = Color.GhostWhite;
-			splitContainer.Panel1.MouseMove += new MouseEventHandler(Panel_MouseMove);
+			//splitContainer.Panel1.MouseMove += new MouseEventHandler(Panel_MouseMove);
 			Controls.Add(splitContainer);
 
 			treeView = new TreeView();
@@ -96,7 +96,10 @@ namespace WindowsFormsSkeletonApplication
 			treeView.Nodes.Add(treeNode);*/
 			treeView.MouseDoubleClick += new MouseEventHandler(treeView_MouseDoubleClick);
 			treeView.NodeMouseClick += new TreeNodeMouseClickEventHandler(treeView_NodeMouseClick);
+			treeView.MouseMove += new MouseEventHandler(treeView_MouseMove);
 			splitContainer.Panel1.Controls.Add(treeView);
+			
+			PopulateTreeView(Directory.GetCurrentDirectory());
 			
 			listView = new ListView();
 			listView.Dock = DockStyle.Fill;
@@ -122,7 +125,7 @@ namespace WindowsFormsSkeletonApplication
 				DialogResult result = fbd.ShowDialog();
 				if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
 				{
-					listView.Clear();
+					/*listView.Clear();
 					foreach (var row in getFileList(fbd.SelectedPath, "*.pdf"))
 					{
 						ListViewItem item = new ListViewItem(row.ToString());
@@ -131,9 +134,57 @@ namespace WindowsFormsSkeletonApplication
 						//	item.SubItems.Add(row[i].ToString());
 						//}
 						listView.Items.Add(item);
-					}
+					}*/
+					treeView.Nodes.Clear(); 
+					LoadDirectory(fbd.SelectedPath);
 				}
 			}
+			
+			void LoadDirectory(string Dir)
+			{  
+				DirectoryInfo di = new DirectoryInfo(Dir);  
+				//Setting ProgressBar Maximum Value  
+				//progressBar1.Maximum = Directory.GetFiles(Dir, "*.*", SearchOption.AllDirectories).Length + Directory.GetDirectories(Dir, "**", SearchOption.AllDirectories).Length;  
+				TreeNode tds = treeView.Nodes.Add(di.Name);  
+				tds.Tag = di.FullName;  
+				tds.StateImageIndex = 0;  
+				LoadFiles(Dir, tds);  
+				LoadSubDirectories(Dir, tds);  
+				}  			
+			void LoadSubDirectories(string dir, TreeNode td)  
+			{  
+			   // Get all subdirectories  
+			   string[] subdirectoryEntries = Directory.GetDirectories(dir);  
+			   // Loop through them to see if they have any other subdirectories  
+			   foreach (string subdirectory in subdirectoryEntries)  
+			   {  
+	  
+				   DirectoryInfo di = new DirectoryInfo(subdirectory);  
+				   TreeNode tds = td.Nodes.Add(di.Name);  
+				   tds.StateImageIndex = 0;  
+				   tds.Tag = di.FullName;  
+				   LoadFiles(subdirectory, tds);  
+				   LoadSubDirectories(subdirectory, tds);  
+				   //UpdateProgress();  
+	  
+			   }  
+			}			
+			void LoadFiles(string dir, TreeNode td)  
+			{  
+				string[] Files = Directory.GetFiles(dir, "*.*");  
+	  
+				// Loop through them to see files  
+				foreach (string file in Files)  
+				{  
+					FileInfo fi = new FileInfo(file);  
+					TreeNode tds = td.Nodes.Add(fi.Name);  
+					tds.Tag = fi.FullName;  
+					tds.StateImageIndex = 1;  
+					//UpdateProgress();  
+	  
+				}  
+			} 			
+			
 			
         }
 
@@ -173,7 +224,7 @@ namespace WindowsFormsSkeletonApplication
 		
 		
 
-		private List<String> getFileList(String path, String filter)
+		private List<String> getFileList(string path, string filter)
 		{
 			List<String> fileList = new List<String>();
 			ProcessDirectory(path, filter);
@@ -236,10 +287,9 @@ namespace WindowsFormsSkeletonApplication
 			}
 		}
 
-		void treeView_NodeMouseClick(object sender,
-		TreeNodeMouseClickEventArgs e)
+		void treeView_NodeMouseClick(object sender,	TreeNodeMouseClickEventArgs e)
 		{
-			TreeNode newSelected = e.Node;
+			/*TreeNode newSelected = e.Node;
 			listView.Items.Clear();
 			DirectoryInfo nodeDirInfo = (DirectoryInfo)newSelected.Tag;
 			ListViewItem.ListViewSubItem[] subItems;
@@ -267,9 +317,27 @@ namespace WindowsFormsSkeletonApplication
 				listView.Items.Add(item);
 			}
 
-			listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+			listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);*/
 		}		
 
-		
+		void treeView_MouseMove(object sender, MouseEventArgs e)  
+		{
+			ToolTip toolTip = new ToolTip();
+			// Get the node at the current mouse pointer location.  
+			TreeNode theNode = treeView.GetNodeAt(e.X, e.Y);  
+
+			// Set a ToolTip only if the mouse pointer is actually paused on a node.  
+			if (theNode != null && theNode.Tag != null)  
+			{  
+			// Change the ToolTip only if the pointer moved to a new node.  
+			if (theNode.Tag.ToString() != toolTip.GetToolTip(treeView))  
+				toolTip.SetToolTip(treeView, theNode.Tag.ToString());  
+			}  
+			else     // Pointer is not over a node so clear the ToolTip.  
+			{  
+				toolTip.SetToolTip(treeView, "");  
+			}  
+		}  
+
     }
 }

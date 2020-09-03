@@ -11,7 +11,6 @@ rename lib pdfpig
 using System;
 using System.IO;
 using System.Collections.Generic;
-//using System.Xml;
 using System.Xml.Linq;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.AcroForms;
@@ -24,7 +23,8 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        try
+        string fileName = "";
+		try
 		{
 			if ( args.Length!=1 )
 			{
@@ -33,11 +33,12 @@ public static class Program
 			}
 			if ( !File.Exists(args[0]) )
 			{
-				Console.WriteLine(@"The file not exists...");
+				Console.WriteLine(@"The '"+args[0]+"' file not exists...");
 				return;
 			}
 			
-			using (PdfDocument document = PdfDocument.Open(args[0]))
+			fileName = args[0];
+			using (PdfDocument document = PdfDocument.Open(fileName))
 			{
 				Console.WriteLine($"Document uses version {document.Version} of the PDF specification.");
 				Console.WriteLine($"Document has {document.NumberOfPages} pages.");
@@ -90,26 +91,26 @@ public static class Program
 					// Console.WriteLine(@"Document doesn't contains bookmarks.");
 				// }
 
+				string fileNamePrefix = fileName.Replace(".pdf","_-_");
 				if (document.Advanced.TryGetEmbeddedFiles(out IReadOnlyList<EmbeddedFile> embeddedFiles) && embeddedFiles.Count > 0)
 				{
-					Console.WriteLine(@"Document contains {embeddedFiles.Count} embedded files.");
+					Console.WriteLine($"Document contains {embeddedFiles.Count} embedded files.");
 					
 					foreach(var file in embeddedFiles)
 					{
 						Console.WriteLine("\t"+file);
-						
+						/* file.Name -> Leírás, file.FileSpecification -> Név */
+						fileName = fileNamePrefix + file.FileSpecification;
 						IReadOnlyList<byte> bytes = file.Bytes;
-						
-						using (BinaryWriter writer = new BinaryWriter(File.Open(args[0]+"_-_"+file.Name, FileMode.Create)))
+						using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
 						{
 							//writer.Write(bytes);
 							foreach(var b in bytes)
-							{
 								writer.Write(b);
-							}
 						}
-						Console.WriteLine("\tThe file saved to: '"+args[0]+"_-_"+file.Name+"'");
-						
+
+						Console.WriteLine("\t-> The file saved to: '"+fileName+"' (Description: '"+file.Name+"')");
+
 					}
 					
 				}
