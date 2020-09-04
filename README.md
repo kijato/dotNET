@@ -1,6 +1,10 @@
 # dotNET
 
 
+[dotNET 4.7.2](https://globalcdn.nuget.org/packages/microsoft.net.compilers.toolset.3.8.0-2.final.nupkg).
+unzip /tasks/net472
+
+
 >where /r c:\ csc.exe
 
 >powershell.exe Get-ItemProperty ....exe -Name VersionInfo
