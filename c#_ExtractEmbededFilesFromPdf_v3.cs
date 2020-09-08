@@ -11,27 +11,30 @@ using System;
 using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
-using System.Collections.Generic;
+//using System.Collections.Generic;
+using System.Xml.Linq;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.AcroForms;
+using UglyToad.PdfPig.AcroForms.Fields;
+using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.Outline;
+using UglyToad.PdfPig.Tokens;
 
 namespace WindowsFormsSkeletonApplication
 {
     class Program : Form
     {
 
-        MainMenu mm = new MainMenu();
-
-		SplitContainer splitContainer = new SplitContainer();
+		SplitContainer splitContainer;
 		
 		TreeView treeView;
 		ListView listView;
 		
-        StatusBar sb = new StatusBar();
-        StatusBarPanel sbp1 = new StatusBarPanel();
-        StatusBarPanel sbp2 = new StatusBarPanel();
+        StatusBar sb;
+        StatusBarPanel sbp1;
+        StatusBarPanel sbp2;
 
-		Form f = new Form();
-		ListBox listBox1 = new ListBox();
-		Label l = new Label();
+		Form f;
 
 	[STAThread]
         public static void Main(string[] args)
@@ -51,10 +54,12 @@ namespace WindowsFormsSkeletonApplication
 
         public Program()
         {
-            this.Size = new Size(500, 300);
+            f = new Form();
+			this.Size = new Size(700, 400);
             this.Text = Application.StartupPath;
             this.Font = new Font(FontFamily.GenericSansSerif, 8);
 
+			MainMenu mm = new MainMenu();
 			MenuItem mi1 = new MenuItem(text: "&File");
 			mi1.MenuItems.Add(new MenuItem("&Open directory", new EventHandler(mi2_Click)));
 			mi1.MenuItems.Add(new MenuItem("&Save", new EventHandler(mi3_Click)));
@@ -63,6 +68,9 @@ namespace WindowsFormsSkeletonApplication
 			mm.MenuItems.Add(mi1);
 			this.Menu = mm;
 
+			StatusBar sb = new StatusBar();
+			StatusBarPanel sbp1 = new StatusBarPanel();
+			StatusBarPanel sbp2 = new StatusBarPanel();
             sb.Panels.Add(sbp1);
             sb.Panels.Add(sbp2);
             sb.ShowPanels = true;
@@ -73,7 +81,7 @@ namespace WindowsFormsSkeletonApplication
             sbp2.Text = System.DateTime.Today.ToLongDateString();
             sbp2.AutoSize = StatusBarPanelAutoSize.Contents;
 
-
+			splitContainer = new SplitContainer();
 			splitContainer.Location = new Point(3, 3);
 			splitContainer.Size = new Size( this.Width - 23, this.Height - sb.Height - 45 );
 			splitContainer.BorderStyle = BorderStyle.FixedSingle;
@@ -85,21 +93,10 @@ namespace WindowsFormsSkeletonApplication
 
 			treeView = new TreeView();
 			treeView.Dock = DockStyle.Fill;
-			/*TreeNode treeNode = new TreeNode("Windows");
-			treeView.Nodes.Add(treeNode);
-			treeNode = new TreeNode("Linux");
-			treeView.Nodes.Add(treeNode);
-			TreeNode node2 = new TreeNode("C#");
-			TreeNode node3 = new TreeNode("VB.NET");
-			TreeNode[] array = new TreeNode[] { node2, node3 };
-			treeNode = new TreeNode("Dot Net Perls", array);
-			treeView.Nodes.Add(treeNode);*/
-			treeView.MouseDoubleClick += new MouseEventHandler(treeView_MouseDoubleClick);
 			treeView.NodeMouseClick += new TreeNodeMouseClickEventHandler(treeView_NodeMouseClick);
-			treeView.MouseMove += new MouseEventHandler(treeView_MouseMove);
+			treeView.MouseDoubleClick += new MouseEventHandler(treeView_MouseDoubleClick);
+			//treeView.MouseMove += new MouseEventHandler(treeView_MouseMove);
 			splitContainer.Panel1.Controls.Add(treeView);
-			
-			PopulateTreeView(Directory.GetCurrentDirectory());
 			
 			listView = new ListView();
 			listView.Dock = DockStyle.Fill;
@@ -107,14 +104,8 @@ namespace WindowsFormsSkeletonApplication
 			listView.GridLines = true;
 			splitContainer.Panel2.Controls.Add(listView);
 
+			FillTreeView(Environment.CurrentDirectory,"*.pdf");
 		}
-
-		private void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-			string[] row = { treeView.SelectedNode.Text };
-			var listViewItem = new ListViewItem(row); 
-			listView.Items.Add(listViewItem);
-        }
 
         private void mi2_Click(object sender, EventArgs e)
         {
@@ -125,20 +116,52 @@ namespace WindowsFormsSkeletonApplication
 				DialogResult result = fbd.ShowDialog();
 				if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
 				{
-					/*listView.Clear();
-					foreach (var row in getFileList(fbd.SelectedPath, "*.pdf"))
-					{
-						ListViewItem item = new ListViewItem(row.ToString());
-						//for (int i = 1; i < data.Columns.Count; i++)
-						//{
-						//	item.SubItems.Add(row[i].ToString());
-						//}
-						listView.Items.Add(item);
-					}*/
 					treeView.Nodes.Clear(); 
-					LoadDirectory(fbd.SelectedPath);
+					//LoadDirectory(fbd.SelectedPath);
+					FillTreeView(fbd.SelectedPath,"*.pdf");
 				}
 			}
+        }
+
+        private void mi3_Click(object sender, EventArgs e)
+        {
+        }
+
+		private void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+			string[] row = { treeView.SelectedNode.Text };
+			var listViewItem = new ListViewItem(row); 
+			listView.Items.Add(listViewItem);
+        }
+		
+		void treeView_NodeMouseClick(object sender,	TreeNodeMouseClickEventArgs e)
+		{
+			using (PdfDocument document = PdfDocument.Open(fileName))
+			{
+			}
+		}		
+
+		void treeView_MouseMove(object sender, MouseEventArgs e)  
+		{
+			ToolTip toolTip = new ToolTip();
+			// Get the node at the current mouse pointer location.  
+			TreeNode theNode = treeView.GetNodeAt(e.X, e.Y);  
+			// Set a ToolTip only if the mouse pointer is actually paused on a node.  
+			if (theNode != null && theNode.Tag != null)  
+			{  
+			// Change the ToolTip only if the pointer moved to a new node.  
+			if (theNode.Tag.ToString() != toolTip.GetToolTip(treeView))  
+				toolTip.SetToolTip(treeView, theNode.Tag.ToString());  
+			}  
+			else     // Pointer is not over a node so clear the ToolTip.  
+			{  
+				toolTip.SetToolTip(treeView, "");  
+			}
+		}  
+
+		public void FillTreeView(string path, string pattern)
+		{
+			LoadDirectory(path);
 			
 			void LoadDirectory(string Dir)
 			{  
@@ -158,7 +181,6 @@ namespace WindowsFormsSkeletonApplication
 			   // Loop through them to see if they have any other subdirectories  
 			   foreach (string subdirectory in subdirectoryEntries)  
 			   {  
-	  
 				   DirectoryInfo di = new DirectoryInfo(subdirectory);  
 				   TreeNode tds = td.Nodes.Add(di.Name);  
 				   tds.StateImageIndex = 0;  
@@ -166,71 +188,32 @@ namespace WindowsFormsSkeletonApplication
 				   LoadFiles(subdirectory, tds);  
 				   LoadSubDirectories(subdirectory, tds);  
 				   //UpdateProgress();  
-	  
 			   }  
 			}			
 			void LoadFiles(string dir, TreeNode td)  
 			{  
-				string[] Files = Directory.GetFiles(dir, "*.*");  
-	  
+				string[] Files = Directory.GetFiles(dir,pattern);  
 				// Loop through them to see files  
 				foreach (string file in Files)  
 				{  
+					if( !file.EndsWith(".pdf") )
+						continue;
 					FileInfo fi = new FileInfo(file);  
 					TreeNode tds = td.Nodes.Add(fi.Name);  
 					tds.Tag = fi.FullName;  
 					tds.StateImageIndex = 1;  
 					//UpdateProgress();  
-	  
 				}  
 			} 			
-			
-			
-        }
-
-        private void mi3_Click(object sender, EventArgs e)
-        {
-            /*MessageBox.Show( this.Font.ToString() +"\n"+ sb.Font.ToString() );
-			
-			listBox1.Width = f.Width - 25;
-			listBox1.Location = new Point(5,5);
-			foreach ( FontFamily oneFontFamily in FontFamily.Families )
-			{
-				listBox1.Items.Add(oneFontFamily.Name);
-			}
-			listBox1.DoubleClick += new EventHandler(ListBox1_DoubleClick);
-			f.Controls.Add(listBox1);
-			l.Location = new Point(5,listBox1.Top + listBox1.Height +5);
-			f.Controls.Add(l);
-			f.Show();*/
-
-
-			PopulateTreeView(Directory.GetCurrentDirectory());
-			
-        }
-
-        private void Panel_MouseMove(object sender, MouseEventArgs e)
-        {
-            sbp1.Text = e.X + " " + e.Y;
-        }
-
-        private void ListBox1_DoubleClick(object sender, EventArgs e)
-        {
-            if (listBox1.SelectedItem != null)
-            {
-                 l.Text = listBox1.SelectedItem.ToString();
-            }
-        }
+		}
 		
-		
-
-		private List<String> getFileList(string path, string filter)
+		/*private List<String> getFileList(string path, string filter)
 		{
 			List<String> fileList = new List<String>();
 			ProcessDirectory(path, filter);
 			return fileList;
 			
-			/* https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getdirectories?view=netframework-4.8 */
+			// https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getdirectories?view=netframework-4.8
 			// Process all files in the directory passed in, recurse on any directories that are found, and process the files they contain.
 			void ProcessDirectory(string targetDirectory, string pattern)
 			{
@@ -249,95 +232,7 @@ namespace WindowsFormsSkeletonApplication
 			{
 				fileList.Add(Path.GetFullPath(fileName));
 			}	
+		}*/
 
-		}			
-
-		
-		
-		// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/creating-an-explorer-style-interface-with-the-listview-and-treeview
-		private void PopulateTreeView(String path)
-		{
-			TreeNode rootNode;
-			
-			DirectoryInfo info = new DirectoryInfo(path);
-			if (info.Exists)
-			{
-				rootNode = new TreeNode(info.Name);
-				rootNode.Tag = info;
-				GetDirectories(info.GetDirectories(), rootNode);
-				treeView.Nodes.Add(rootNode);
-			}
-		}
-
-		private void GetDirectories(DirectoryInfo[] subDirs, TreeNode nodeToAddTo)
-		{
-			TreeNode aNode;
-			DirectoryInfo[] subSubDirs;
-			foreach (DirectoryInfo subDir in subDirs)
-			{
-				aNode = new TreeNode(subDir.Name, 0, 0);
-				aNode.Tag = subDir;
-				aNode.ImageKey = "folder";
-				subSubDirs = subDir.GetDirectories();
-				if (subSubDirs.Length != 0)
-				{
-					GetDirectories(subSubDirs, aNode);
-				}
-				nodeToAddTo.Nodes.Add(aNode);
-			}
-		}
-
-		void treeView_NodeMouseClick(object sender,	TreeNodeMouseClickEventArgs e)
-		{
-			/*TreeNode newSelected = e.Node;
-			listView.Items.Clear();
-			DirectoryInfo nodeDirInfo = (DirectoryInfo)newSelected.Tag;
-			ListViewItem.ListViewSubItem[] subItems;
-			ListViewItem item = null;
-
-			foreach (DirectoryInfo dir in nodeDirInfo.GetDirectories())
-			{
-				item = new ListViewItem(dir.Name, 0);
-				subItems = new ListViewItem.ListViewSubItem[]
-					{new ListViewItem.ListViewSubItem(item, "Directory"),
-					 new ListViewItem.ListViewSubItem(item,
-						dir.LastAccessTime.ToShortDateString())};
-				item.SubItems.AddRange(subItems);
-				listView.Items.Add(item);
-			}
-			foreach (FileInfo file in nodeDirInfo.GetFiles())
-			{
-				item = new ListViewItem(file.Name, 1);
-				subItems = new ListViewItem.ListViewSubItem[]
-					{ new ListViewItem.ListViewSubItem(item, "File"),
-					 new ListViewItem.ListViewSubItem(item,
-						file.LastAccessTime.ToShortDateString())};
-
-				item.SubItems.AddRange(subItems);
-				listView.Items.Add(item);
-			}
-
-			listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);*/
-		}		
-
-		void treeView_MouseMove(object sender, MouseEventArgs e)  
-		{
-			ToolTip toolTip = new ToolTip();
-			// Get the node at the current mouse pointer location.  
-			TreeNode theNode = treeView.GetNodeAt(e.X, e.Y);  
-
-			// Set a ToolTip only if the mouse pointer is actually paused on a node.  
-			if (theNode != null && theNode.Tag != null)  
-			{  
-			// Change the ToolTip only if the pointer moved to a new node.  
-			if (theNode.Tag.ToString() != toolTip.GetToolTip(treeView))  
-				toolTip.SetToolTip(treeView, theNode.Tag.ToString());  
-			}  
-			else     // Pointer is not over a node so clear the ToolTip.  
-			{  
-				toolTip.SetToolTip(treeView, "");  
-			}  
-		}  
-
-    }
+	}
 }
