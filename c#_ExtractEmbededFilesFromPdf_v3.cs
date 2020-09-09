@@ -33,8 +33,8 @@ namespace WindowsFormsSkeletonApplication
         StatusBar sb;
         StatusBarPanel sbp1;
         StatusBarPanel sbp2;
-
-		Form f;
+		
+		ToolTip tt;
 
 	[STAThread]
         public static void Main(string[] args)
@@ -54,7 +54,6 @@ namespace WindowsFormsSkeletonApplication
 
         public Program()
         {
-            f = new Form();
 			this.Size = new Size(700, 400);
             this.Text = Application.StartupPath;
             this.Font = new Font(FontFamily.GenericSansSerif, 8);
@@ -68,9 +67,9 @@ namespace WindowsFormsSkeletonApplication
 			mm.MenuItems.Add(mi1);
 			this.Menu = mm;
 
-			StatusBar sb = new StatusBar();
-			StatusBarPanel sbp1 = new StatusBarPanel();
-			StatusBarPanel sbp2 = new StatusBarPanel();
+			sb = new StatusBar();
+			sbp1 = new StatusBarPanel();
+			sbp2 = new StatusBarPanel();
             sb.Panels.Add(sbp1);
             sb.Panels.Add(sbp2);
             sb.ShowPanels = true;
@@ -95,19 +94,25 @@ namespace WindowsFormsSkeletonApplication
 			treeView.Dock = DockStyle.Fill;
 			treeView.NodeMouseClick += new TreeNodeMouseClickEventHandler(treeView_NodeMouseClick);
 			treeView.MouseDoubleClick += new MouseEventHandler(treeView_MouseDoubleClick);
-			//treeView.MouseMove += new MouseEventHandler(treeView_MouseMove);
+			treeView.MouseMove += new MouseEventHandler(treeView_MouseMove);
 			splitContainer.Panel1.Controls.Add(treeView);
 			
 			listView = new ListView();
 			listView.Dock = DockStyle.Fill;
-			listView.View = View.List;
+			listView.View = View.Details;
 			listView.GridLines = true;
+			listView.Columns.Add("Kulcs");
+			listView.Columns.Add("Érték");
 			splitContainer.Panel2.Controls.Add(listView);
 
-			FillTreeView(Environment.CurrentDirectory,"*.pdf");
+			FillTreeView(Environment.CurrentDirectory);
+			
+			//tt = new ToolTip();
+			//tt.ShowAlways = true;
+			
 		}
 
-        private void mi2_Click(object sender, EventArgs e)
+        void mi2_Click(object sender, EventArgs e)
         {
             using(var fbd = new FolderBrowserDialog())
 			{
@@ -118,28 +123,50 @@ namespace WindowsFormsSkeletonApplication
 				{
 					treeView.Nodes.Clear(); 
 					//LoadDirectory(fbd.SelectedPath);
-					FillTreeView(fbd.SelectedPath,"*.pdf");
+					FillTreeView(fbd.SelectedPath);
 				}
 			}
         }
 
-        private void mi3_Click(object sender, EventArgs e)
+        void mi3_Click(object sender, EventArgs e)
         {
-        }
-
-		private void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-			string[] row = { treeView.SelectedNode.Text };
-			var listViewItem = new ListViewItem(row); 
-			listView.Items.Add(listViewItem);
         }
 		
 		void treeView_NodeMouseClick(object sender,	TreeNodeMouseClickEventArgs e)
+		//void treeView_NodeMouseClick(object sender,	MouseEventArgs e)
 		{
-			using (PdfDocument document = PdfDocument.Open(fileName))
+			if ( File.Exists(treeView.SelectedNode.Text) )
+			using (PdfDocument document = PdfDocument.Open(treeView.SelectedNode.Text))
 			{
+				//listView.Items.Clear();
+				/*listView.Items.Add( addItem( "Title:", document.Information.Title ) );
+				listView.Items.Add( addItem( "Author:", document.Information.Author ) );
+				listView.Items.Add( addItem( "Subject:", document.Information.Subject ) );
+				listView.Items.Add( addItem( "Keywords:", document.Information.Keywords ) );
+				listView.Items.Add( addItem( "Creator:", document.Information.Creator ) );
+				listView.Items.Add( addItem( "Producer:", document.Information.Producer ) );
+				listView.Items.Add( addItem( "CreationDate:", document.Information.CreationDate ) );
+				listView.Items.Add( addItem( "ModifiedDate:", document.Information.ModifiedDate ) );*/
+				string[] row = { "Creator:", document.Information.Creator };
+				var listViewItem = new ListViewItem(row); 
+				listView.Items.Add(listViewItem);
 			}
+			
+			/*ListViewItem addItem(string k, string v)
+			{
+				ListViewItem lvi = new ListViewItem();
+				lvi.SubItems.Add(k);
+				lvi.SubItems.Add(v);
+				return lvi;
+			}*/
 		}		
+
+		void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+			/*string[] row = { treeView.SelectedNode.Text };
+			var listViewItem = new ListViewItem(row); 
+			listView.Items.Add(listViewItem);*/
+        }
 
 		void treeView_MouseMove(object sender, MouseEventArgs e)  
 		{
@@ -159,7 +186,10 @@ namespace WindowsFormsSkeletonApplication
 			}
 		}  
 
-		public void FillTreeView(string path, string pattern)
+		/*
+			https://www.c-sharpcorner.com/article/display-sub-directories-and-files-in-treeview/
+		*/
+		void FillTreeView(string path)
 		{
 			LoadDirectory(path);
 			
@@ -192,7 +222,7 @@ namespace WindowsFormsSkeletonApplication
 			}			
 			void LoadFiles(string dir, TreeNode td)  
 			{  
-				string[] Files = Directory.GetFiles(dir,pattern);  
+				string[] Files = Directory.GetFiles(dir,"*.pdf");  
 				// Loop through them to see files  
 				foreach (string file in Files)  
 				{  
