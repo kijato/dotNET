@@ -24,10 +24,9 @@ public class Form1 : Form
 {  
 
     StatusBar mainStatusBar = new StatusBar();
+	SplitContainer splitContainer = new SplitContainer();
     Panel panel1 = new Panel();
-    
-    int x;  
-    int y;
+	TextBox textBox = new TextBox();
     
     GraphicsPath mousePath = new GraphicsPath();
 
@@ -50,11 +49,16 @@ public class Form1 : Form
    {
         Size = new Size(800, 600);
         Controls.Add(mainStatusBar);
-        Controls.Add(panel1);
+	    Controls.Add(splitContainer);
+		splitContainer.Dock = DockStyle.Fill;
+        splitContainer.Panel1.Controls.Add(panel1);
+        splitContainer.Panel2.Controls.Add(textBox);
         panel1.Dock = DockStyle.Fill;
         panel1.BackColor = Color.White;
+        textBox.Dock = DockStyle.Fill;
+		textBox.Multiline = true;
         
-        panel1.Click += new EventHandler(Click);
+        panel1.MouseClick += new MouseEventHandler(MouseClick);
         //panel1.MouseLeave += new EventHandler(MouseLeave);
         //panel1.MouseEnter += new EventHandler(MouseEnter);
         panel1.MouseHover += new EventHandler(MouseHover);
@@ -72,21 +76,54 @@ public class Form1 : Form
     {
         // Update the mouse event label to indicate the MouseHover event occurred.
         mainStatusBar.Text = sender.GetType().ToString() + ": MouseHover";
+
     }   
    
    private void MouseDown(object sender, MouseEventArgs e)  
-   {  
-        Point mouseDownLocation = new Point(e.X, e.Y);
-        mousePath.AddLine(mouseDownLocation,mouseDownLocation);
-        panel1.Focus();
-        panel1.Invalidate();
-        
-   } 
+   {
+		
+        if (e.Button == MouseButtons.Left ) {
+			Point mouseDownLocation = new Point(e.X, e.Y);
+			mousePath.AddLine(mouseDownLocation,mouseDownLocation);
+			panel1.Focus();
+			panel1.Invalidate();
+		}
+        if (e.Button == MouseButtons.Right ) {
+			mousePath.CloseAllFigures ();
+			//panel1.Focus();
+			panel1.Invalidate();
+		}
+		
+  
+	} 
    
    private void MouseMove(object sender, MouseEventArgs e)  
    {  
         mainStatusBar.Text = e.X + " " + e.Y;
-        
+         Point mouseDownLocation = new Point(e.X, e.Y);
+        //mousePath.AddLine(mouseDownLocation,mouseDownLocation);
+        //panel1.Focus();
+        //panel1.Invalidate();
+           
+   } 
+   
+   private void Paint(object sender, PaintEventArgs e)  
+   {  
+        //mainStatusBar.Text = "..";
+        Graphics myGraphics = e.Graphics; 
+        Pen myPen = new Pen(Color.Red, 3); 
+        myGraphics.DrawLine(myPen, 30, 20, 300, 100);
+         e.Graphics.DrawPath(System.Drawing.Pens.DarkRed, mousePath);
+   }
+
+    private void MouseClick(object sender, MouseEventArgs e)  
+    {  
+        /*Point p = new Point(e.X, e.Y);  
+        x = p.X;  
+        y = p.Y;  
+        panel1.Invalidate();  
+        mainStatusBar.Text = "click";*/
+		
         switch (e.Button) {
             case MouseButtons.Left:
                 mainStatusBar.Text += "L";
@@ -99,26 +136,6 @@ public class Form1 : Form
                 break;
             default:
             break;
-        }
-        
-   } 
-   
-   private void Paint(object sender, PaintEventArgs e)  
-   {  
-        mainStatusBar.Text = "..";
-        Graphics myGraphics = e.Graphics; 
-        Pen myPen = new Pen(Color.Red, 3); 
-        myGraphics.DrawLine(myPen, 30, 20, 300, 100);
-         e.Graphics.DrawPath(System.Drawing.Pens.DarkRed, mousePath);
-   }
-
-    private void Click(object sender, EventArgs e)  
-    {  
-        /*Point p = new Point(e.X, e.Y);  
-        x = p.X;  
-        y = p.Y;  
-        panel1.Invalidate();  */
-        mainStatusBar.Text = "click";
-    }   
+        }     }   
  
 }  
