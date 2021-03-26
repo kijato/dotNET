@@ -24,11 +24,11 @@ public class Form1 : Form
 {  
 
     MainMenu mainMenu = new MainMenu();
+    MenuStrip menuStrip = new MenuStrip();
 
     StatusBar mainStatusBar = new StatusBar();
-    
-    MenuStrip menuStrip = new MenuStrip();
     StatusStrip statusStrip = new StatusStrip();  
+
     ToolStripStatusLabel statusLabel = new ToolStripStatusLabel();
 
     SplitContainer splitContainer = new SplitContainer();
@@ -57,7 +57,7 @@ public class Form1 : Form
    {
         Size = new Size(800, 600);
         
-		MenuItem mi1 = new MenuItem(text: "&File");
+		var mi1 = new MenuItem(text: "&File");
 		mi1.MenuItems.Add(new MenuItem("&Open", new EventHandler(ButtonClick)));
 		mi1.MenuItems.Add(new MenuItem("&Save", new EventHandler(ButtonClick)));
 		mi1.MenuItems.Add(new MenuItem("-"));
@@ -77,16 +77,25 @@ public class Form1 : Form
 		saveFileMenuItem.Enabled = false;
 		quitFileMenuItem.Click += new EventHandler (ButtonClick);
         
-
         
+        StatusBarPanel sbpanel1 = new StatusBarPanel();
+        StatusBarPanel sbpanel2 = new StatusBarPanel();
+        mainStatusBar.Panels.Add(sbpanel1);
+        mainStatusBar.Panels.Add(sbpanel2);
+        sbpanel1.AutoSize = StatusBarPanelAutoSize.Spring;
+        sbpanel2.ToolTipText = "Started: " + System.DateTime.Now.ToShortTimeString();
+        sbpanel2.Text = System.DateTime.Today.ToLongDateString();
+        sbpanel2.AutoSize = StatusBarPanelAutoSize.Contents;
+        mainStatusBar.ShowPanels = true;
         Controls.Add(mainStatusBar);
+        
         
         statusStrip.Name = "statusStrip";  
         statusStrip.BackColor = Color.Beige;  
+        statusStrip.Items.AddRange(new ToolStripItem[] {statusLabel});
         Controls.Add(statusStrip);
         
-        statusStrip.Items.AddRange(new ToolStripItem[] {statusLabel});
-        statusLabel.Text = "fgdfgdfgd";
+        statusLabel.Text = "";
 
         Controls.Add(splitContainer);
         splitContainer.Dock = DockStyle.Fill;
@@ -120,7 +129,8 @@ public class Form1 : Form
     private void MouseHover(object sender, EventArgs e) 
     {
         // Update the mouse event label to indicate the MouseHover event occurred.
-        mainStatusBar.Text = sender.GetType().ToString() + ": MouseHover";
+        //mainStatusBar.Text = sender.GetType().ToString() + ": MouseHover";
+        //mainStatusBar.Text = sender.GetType().ToString() + ": MouseHover";
 
     }   
    
@@ -144,7 +154,9 @@ public class Form1 : Form
    
    private void MouseMove(object sender, MouseEventArgs e)  
    {  
-        mainStatusBar.Text = e.X + " " + e.Y;
+        //mainStatusBar.Text = e.X + " " + e.Y;
+        mainStatusBar.Panels[0].Text = e.X + " " + e.Y;
+        textBox.AppendText(e.X + " " + e.Y + Environment.NewLine);
          Point mouseDownLocation = new Point(e.X, e.Y);
         //mousePath.AddLine(mouseDownLocation,mouseDownLocation);
         //panel1.Focus();
@@ -171,13 +183,13 @@ public class Form1 : Form
   
         switch (e.Button) {
             case MouseButtons.Left:
-                mainStatusBar.Text += "L";
+                statusLabel.Text += "L";
                 break;
             case MouseButtons.Middle:
-                mainStatusBar.Text += "M";
+                statusLabel.Text += "M";
                 break;
             case MouseButtons.Right:
-                mainStatusBar.Text += "R";
+                statusLabel.Text += "R";
                 break;
             default:
             break;
