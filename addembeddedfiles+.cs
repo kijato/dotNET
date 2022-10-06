@@ -8,6 +8,8 @@ using System.IO;
 using System.Text;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Filespec;
+//using System.Security.Principal;
+//using System.DirectoryServices.AccountManagement;
 //using iText.Layout.Element;
 
 // csc -r:itext.kernel.dll,itext.io.dll,itext.layout.dll addembeddedfiles+.cs
@@ -26,7 +28,7 @@ namespace iText
         {
 			if ( args.Length<3)
 			{
-				Console.WriteLine("\nA program különféle fájlok PDF-be ágyazására szolgál.\nA futásához legalább 3 fájlnevet meg kell adni a parancssorban:\nAz 1. paraméter a 'forrás', mely a beágyazás alapja.\nA 2. paraméter a 'cél', melybe a beágyazandó állományok kerülnek.\nA további, paraméterként átadott állományokat, a program a 'cél'-ba, mellékletként beágyazza.\n\nNyomj meg egy gombot a kilépéshez...!"
+				Console.WriteLine("\nA program különféle fájlok PDF-be ágyazására szolgál.\nA futásához legalább 3 fájlnevet meg kell adni a parancssorban:\n\t1. paraméter a 'forrás', mely a beágyazás alapja.\n\t2. paraméter a 'cél', melybe a beágyazandó állományok kerülnek.\n\tA további, paraméterként átadott állományokat, a program a 'cél'-ba, mellékletként beágyazza.\n\n"+System.AppDomain.CurrentDomain.FriendlyName+" <eredeti pdf> <új pdf> [fájlok, szóközzel elválasztva]\n\nNyomj meg egy gombot a kilépéshez...!"
 				);
 				Console.ReadKey();
 				return;
@@ -40,16 +42,19 @@ namespace iText
 			SRC = files[0];
 			DEST = files[1];
 
-            FileInfo file = new FileInfo(DEST);
-            file.Directory.Create();
+            FileInfo dir = new FileInfo(DEST);
+            dir.Directory.Create();
 			
 			PdfDocument pdfDoc = new PdfDocument(new PdfReader(SRC), new PdfWriter(DEST));
 
             //foreach (String text in ATTACHMENTS)
 			for ( int i=2; i<files.Length; i++ )
             {
-				String embeddedFileName = files[i];
-                String embeddedFileDescription = Environment.GetEnvironmentVariable("USERNAME")+"@"+Environment.GetEnvironmentVariable("COMPUTERNAME");
+				FileInfo file = new FileInfo(files[i]);
+				String embeddedFileName = file.Name;
+                //String embeddedFileDescription = Environment.GetEnvironmentVariable("USERNAME")+"@"+Environment.GetEnvironmentVariable("COMPUTERNAME");
+                //String embeddedFileDescription = System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName+"@"+Environment.GetEnvironmentVariable("COMPUTERNAME");
+				String embeddedFileDescription = file.CreationTime.ToString();
                 byte[] embeddedFileContentBytes = File.ReadAllBytes(files[i]);
 
                 // the 5th argument is the mime-type of the embedded file;
