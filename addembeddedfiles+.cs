@@ -1,5 +1,4 @@
-//css_args  hello.pdf hello+.pdf "hello_+_embedded_file.pdf" "hello_+_embedded_files.pdf" "efoldmero_400000106123+.pdf"
-//css_args  "690585-2022.pdf" "690585-2022+.pdf" hello.pdf "hello_+_embedded_file.pdf" "hello_+_embedded_files.pdf" "0014179-1.png"
+//css_args  hello.pdf hello+.pdf "hello_+_embedded_file.pdf" "hello_+_embedded_files.pdf"
 //css_reference d:\GetEmailsFromGroupwise\itext.kernel.dll;
 //css_reference d:\GetEmailsFromGroupwise\itext.io.dll;
 //css_reference d:\GetEmailsFromGroupwise\itext.layout.dll;
