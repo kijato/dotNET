@@ -1,5 +1,26 @@
 # dotNET
 
+1.
+[Microsoft.Net.Compilers.Toolset](https://www.nuget.org/packages/Microsoft.Net.Compilers.Toolset/)
+1.1.
+jobb oldali lista: Download package
+1.2.
+jelen pillanatban ez a [https://www.nuget.org/api/v2/package/Microsoft.Net.Compilers.Toolset/4.5.0] címre mutat, rákattintva pedig a https://globalcdn.nuget.org/packages/microsoft.net.compilers.toolset.4.5.0.nupkg fájl tölthető le, ami valójában ez ZIP fájl.
+1.3
+A fájlból csak a "/tasks/net472" könyvtárra van szükség, ezt kell kicsomagolni.
+
+
+
+using System;
+static class Program
+{
+	static void Main()
+	{
+		Console.WriteLine("Hello World!");
+	}
+}
+
+
 
 [dotNET 4.7.2](https://globalcdn.nuget.org/packages/microsoft.net.compilers.toolset.3.8.0-2.final.nupkg).
 unzip /tasks/net472
